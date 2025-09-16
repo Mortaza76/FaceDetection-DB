@@ -1,27 +1,51 @@
-name: Test AMD64 Build
+name: Build, Test & Push AMD64 Docker Image
 
-on: [push, pull_request]  # runs when you push or create PR
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest   # this is an AMD64 VM
+  build-and-push:
+    runs-on: ubuntu-latest   # Real AMD64 VM
 
     steps:
-      - name: Checkout repo
+      # 1. Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2. Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build image for AMD64
+      # 3. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 4. Build AMD64 image
+      - name: Build AMD64 Docker image
         run: |
           docker buildx build \
             --platform linux/amd64 \
-            -t test-image \
+            -t mortaza77/database:amd64 \
             . \
             --load
 
+      # 5. Test ONNXRuntime inside container
       - name: Test ONNXRuntime inside container
         run: |
-          docker run --rm test-image \
+          docker run --rm mortaza77/database:amd64 \
             python -c "import onnxruntime; print('onnxruntime version:', onnxruntime.__version__)"
+
+      # 6. Push to Docker Hub if test succeeds
+      - name: Push AMD64 image to Docker Hub
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t mortaza77/database:amd64 \
+            . \
+            --push
