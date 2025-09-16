@@ -1,0 +1,27 @@
+name: Test AMD64 Build
+
+on: [push, pull_request]  # runs when you push or create PR
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest   # this is an AMD64 VM
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build image for AMD64
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t test-image \
+            . \
+            --load
+
+      - name: Test ONNXRuntime inside container
+        run: |
+          docker run --rm test-image \
+            python -c "import onnxruntime; print('onnxruntime version:', onnxruntime.__version__)"
