@@ -63,4 +63,4 @@ docker-compose exec -T mysql mysql -u root -pMortaza@348 face_recognition_attend
 - Database schema is compatible with MySQL on AMD64
 - Health checks are implemented for both services
 - Resource limits are set for better stability
-- Automatic database synchronization is enabled
+- Automatic database synchronization is enabled# Dummy change to trigger workflow
