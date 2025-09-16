@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  face-detection:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    ports:
+      - "8001:8001"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=face_recognition_attendance
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=Mortaza@348
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./snapshots:/app/snapshots
+    restart: unless-stopped
+    # Use Dockerfile healthcheck (no duplication here)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  mysql:
+    image: mysql:8.0
+    platform: linux/amd64
+    environment:
+      - MYSQL_ROOT_PASSWORD=Mortaza@348
+      - MYSQL_DATABASE=face_recognition_attendance
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - ./mysql_prod.cnf:/etc/mysql/conf.d/mysql_prod.cnf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+volumes:
+  mysql_data:
