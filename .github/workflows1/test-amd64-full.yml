@@ -1,4 +1,4 @@
-name: Test AMD64 Docker Image Fully
+name: Full AMD64 Docker Image Test
 
 on:
   push:
@@ -27,21 +27,26 @@ jobs:
           - ${{ github.workspace }}/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
 
     steps:
+      # 1. Checkout code
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2. Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # 3. Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 4. Pull AMD64 Docker image
       - name: Pull AMD64 Docker image
         run: docker pull mortaza77/database:amd64
 
+      # 5. Run FastAPI container linked to MySQL
       - name: Run FastAPI container
         run: |
           docker run -d --name test-app \
@@ -54,12 +59,25 @@ jobs:
             -p 8001:8001 \
             mortaza77/database:amd64
 
+      # 6. Wait for app startup
       - name: Wait for FastAPI startup
         run: sleep 15
 
+      # 7. Test /health endpoint
       - name: Test /health endpoint
         run: |
           docker exec test-app python -c "import requests; r = requests.get('http://localhost:8001/health'); print('Status:', r.status_code); assert r.status_code == 200"
 
+      # 8. Test /employees endpoint
+      - name: Test /employees endpoint
+        run: |
+          docker exec test-app python -c "import requests; r = requests.get('http://localhost:8001/employees'); print('Status:', r.status_code); assert r.status_code == 200; print('Response:', r.json())"
+
+      # 9. Test /predict or any other endpoint
+      - name: Test /predict endpoint
+        run: |
+          docker exec test-app python -c "import requests; r = requests.post('http://localhost:8001/predict', json={'image_path': '/app/snapshots/sample.jpg'}); print('Status:', r.status_code); assert r.status_code == 200; print('Response:', r.json())"
+
+      # 10. Stop FastAPI container
       - name: Stop FastAPI container
         run: docker stop test-app
