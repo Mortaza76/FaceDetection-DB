@@ -16,8 +16,7 @@ query_cache_size = 32M
 
 # Logging
 slow_query_log = 1
-slow_query_log_file = /var/log/mysql/slow.log
-long_query_time = 2
+# slow_query_log_file = /var/log/mysql/slow.log  # Disabled for Docker container
 
 # Security
 bind-address = 0.0.0.0

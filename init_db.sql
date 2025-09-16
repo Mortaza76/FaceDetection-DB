@@ -1,6 +1,5 @@
--- Initialize Face Recognition Attendance Database
--- This script creates all necessary tables for the Face Detection System
-
+-- Ensure database exists
+CREATE DATABASE IF NOT EXISTS face_recognition_attendance;
 USE face_recognition_attendance;
 
 -- Create employees table
@@ -69,15 +68,15 @@ CREATE TABLE IF NOT EXISTS cafeteria_overstay_alerts (
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 );
 
--- Insert sample data for testing (optional)
+-- Insert sample data for testing
 INSERT IGNORE INTO employees (name, status) VALUES 
 ('John Doe', 'active'),
 ('Jane Smith', 'active'),
 ('Bob Johnson', 'active');
 
--- Create indexes for better performance
-CREATE INDEX idx_events_employee_date ON employee_zone_events (employee_name, DATE(timestamp));
-CREATE INDEX idx_events_zone_date ON employee_zone_events (zone_name, DATE(timestamp));
-CREATE INDEX idx_summary_date_range ON daily_attendance_summary (date, employee_id);
+-- Create simple indexes instead of functional indexes
+CREATE INDEX idx_events_employee ON employee_zone_events(employee_name, timestamp);
+CREATE INDEX idx_events_zone ON employee_zone_events(zone_name, timestamp);
+CREATE INDEX idx_summary ON daily_attendance_summary(date, employee_id);
 
 COMMIT;
