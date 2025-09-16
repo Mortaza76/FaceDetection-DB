@@ -1,5 +1,5 @@
 # ---- Stage 1: Build ----
-FROM python:3.10.18 AS builder
+FROM python:3.10.18-bullseye AS builder
 
 WORKDIR /app
 
@@ -32,7 +32,7 @@ COPY . .
 RUN mkdir -p /app/snapshots
 
 # ---- Stage 2: Final image ----
-FROM python:3.10.18
+FROM python:3.10.18-bullseye
 
 WORKDIR /app
 
