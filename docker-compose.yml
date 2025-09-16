@@ -5,22 +5,22 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    platform: linux/amd64
+      platform: linux/amd64   # ensures AMD64 image
+    image: mortaza77/database:amd64  # optional: prebuilt image tag
     ports:
       - "8001:8001"
     environment:
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - MYSQL_DATABASE=face_recognition_attendance
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=Mortaza@348
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: face_recognition_attendance
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Mortaza@348
     depends_on:
       mysql:
         condition: service_healthy
     volumes:
       - ./snapshots:/app/snapshots
     restart: unless-stopped
-    # Use Dockerfile healthcheck (no duplication here)
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/health')"]
       interval: 30s
@@ -38,8 +38,8 @@ services:
     image: mysql:8.0
     platform: linux/amd64
     environment:
-      - MYSQL_ROOT_PASSWORD=Mortaza@348
-      - MYSQL_DATABASE=face_recognition_attendance
+      MYSQL_ROOT_PASSWORD: Mortaza@348
+      MYSQL_DATABASE: face_recognition_attendance
     ports:
       - "3306:3306"
     volumes:

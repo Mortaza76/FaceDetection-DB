@@ -1,8 +1,9 @@
-FROM python:3.10.18
+# ---- Stage 1: Build ----
+FROM python:3.10.18 AS builder
 
 WORKDIR /app
 
-# Install system dependencies for OpenCV, insightface, onnxruntime
+# Install system dependencies for building packages
 RUN apt-get update && apt-get install -y \
     build-essential \
     gcc \
@@ -17,9 +18,10 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     libgtk-3-0 \
     execstack \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy requirements and install dependencies
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel \
     && pip install --no-cache-dir --prefer-binary -r requirements.txt
@@ -33,6 +35,17 @@ COPY . .
 # Ensure snapshots directory exists
 RUN mkdir -p /app/snapshots
 
+# ---- Stage 2: Final image ----
+FROM python:3.10.18-slim
+
+WORKDIR /app
+
+# Copy Python dependencies and app from builder stage
+COPY --from=builder /usr/local/lib/python3.10 /usr/local/lib/python3.10
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /app /app
+
+# Expose app port
 EXPOSE 8001
 
 # Health check
