@@ -32,9 +32,19 @@ COPY . .
 RUN mkdir -p /app/snapshots
 
 # ---- Stage 2: Final image ----
-FROM python:3.10.18-slim
+FROM python:3.10.18
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libgomp1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgl1 \
+    && rm -rf /var/lib/apt/lists/*
+
 
 # Copy Python dependencies and app from builder stage
 COPY --from=builder /usr/local/lib/python3.10 /usr/local/lib/python3.10
