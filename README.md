@@ -291,4 +291,4 @@ For deployment issues, ensure you're using the docker-compose approach as it pro
 - Data persistence
 - Health checks
 
-Contact the development team if you continue to experience issues.
+Contact me on my website Mortaza76.github.io  if you continue to experience issues.
